@@ -7,9 +7,10 @@ export class ProductsController {
 
   @Get()
   findAll(
+    @Query('keyword') keyword?: string,
     @Query('category') category?: 'SUMMER' | 'FALL' | 'SPRING' | 'WINTER',
     @Query('order-price-by') orderPriceBy?: 'asc' | 'desc',
   ) {
-    return this.productsService.findAll(category, orderPriceBy);
+    return this.productsService.findAll(keyword, category, orderPriceBy);
   }
 }

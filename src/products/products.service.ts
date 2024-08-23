@@ -6,6 +6,7 @@ export class ProductsService {
   constructor(private prismaService: PrismaService) {}
 
   async findAll(
+    keyword?: string,
     category?: 'SUMMER' | 'FALL' | 'SPRING' | 'WINTER',
     orderPriceBy?: 'asc' | 'desc',
   ) {
@@ -13,13 +14,19 @@ export class ProductsService {
       const data: any[] = await this.prismaService.product.findMany({
         where: {
           category: category,
+          name: {
+            contains: keyword,
+            mode: 'insensitive',
+          },
         },
         orderBy: {
           price: orderPriceBy,
         },
       });
 
-      return { data, error: null };
+      if (data.length <= 0) throw Error();
+
+      return { message: data, error: null };
     } catch (error) {
       throw new NotFoundException('No data was found');
     }
