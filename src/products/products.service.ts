@@ -24,8 +24,6 @@ export class ProductsService {
         },
       });
 
-      if (data.length <= 0) throw Error();
-
       return { message: data, error: null };
     } catch (error) {
       throw new NotFoundException('No data was found');
