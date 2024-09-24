@@ -20,6 +20,15 @@ model Product {
   description String?
   price       Float
   category    Category?
+  Cart        Cart[]
+}
+
+model Cart {
+  id        Int     @id @default(autoincrement())
+  userID    String
+  product   Product @relation(fields: [productID], references: [id])
+  productID Int
+  quantity  Int
 }
 
 enum Category {
