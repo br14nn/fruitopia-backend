@@ -19,7 +19,7 @@ export class UsersService {
           where: { id: createUserDto.id },
         });
 
-        return data;
+        return { message: data, error: null };
       } else throw Error();
     } catch (error) {
       throw new BadRequestException('Failed to create user');
