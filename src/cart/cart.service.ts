@@ -11,40 +11,28 @@ export class CartService {
       const foundData = await this.prismaService.cart.findFirst({
         where: {
           AND: [
-            {
-              userID: createCartDto.userID,
-            },
-            {
-              productID: createCartDto.productID,
-            },
+            { userID: createCartDto.userID },
+            { productID: createCartDto.productID },
           ],
         },
       });
 
+      // return createCartDto;
       if (!foundData) {
         await this.prismaService.cart.create({
           data: {
-            ...createCartDto,
             quantity: 1,
+            user: { connect: { id: createCartDto.userID } },
+            product: { connect: { id: createCartDto.productID } },
           },
         });
 
         return { message: 'Created a cart data', error: null };
       } else {
-        await this.prismaService.cart.update({
-          where: {
-            id: foundData.id,
-          },
-          data: {
-            quantity: {
-              increment: 1,
-            },
-          },
-        });
-
-        return { message: 'Updated a cart data', error: null };
+        return { message: 'Cart data already exists', error: null };
       }
     } catch (error) {
+      console.log(error);
       throw new BadRequestException('Failed to create cart');
     }
   }
