@@ -1,10 +1,36 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateCartDto } from './dto/create-cart.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateCartDto, FindUserCartDto } from './dto';
 
 @Injectable()
 export class CartService {
   constructor(private prismaService: PrismaService) {}
+
+  async find(findUserCartDto: FindUserCartDto) {
+    try {
+      const userCart = await this.prismaService.cart.findMany({
+        where: {
+          userID: findUserCartDto.userID,
+        },
+        select: {
+          id: true,
+          quantity: true,
+          productID: true,
+          product: true,
+        },
+      });
+
+      return { message: userCart, error: null };
+    } catch (error) {
+      throw new NotFoundException(
+        "Something went wrong retrieving a user's cart list",
+      );
+    }
+  }
 
   async create(createCartDto: CreateCartDto) {
     try {
