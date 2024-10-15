@@ -65,19 +65,26 @@ export class CartService {
 
   async find(findUserCartDto: FindUserCartDto) {
     try {
-      const userCart = await this.prismaService.cart.findMany({
-        where: {
-          userID: findUserCartDto.userID,
-        },
-        select: {
-          id: true,
-          quantity: true,
-          productID: true,
-          product: true,
-        },
-      });
+      if (findUserCartDto.userID) {
+        const userCart = await this.prismaService.cart.findMany({
+          where: {
+            userID: findUserCartDto.userID,
+          },
+          select: {
+            id: true,
+            quantity: true,
+            productID: true,
+            product: true,
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        });
 
-      return { message: userCart, error: null };
+        return { message: userCart, error: null };
+      }
+
+      return { message: [], error: null };
     } catch (error) {
       throw new NotFoundException(
         "Something went wrong retrieving a user's cart list",

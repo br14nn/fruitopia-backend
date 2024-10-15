@@ -16,7 +16,7 @@ export class CartController {
 
   @Patch()
   async update(
-    @Query(
+    @Body(
       new ValidationPipe({
         transform: true,
         transformOptions: { enableImplicitConversion: true },
@@ -24,7 +24,6 @@ export class CartController {
     )
     updateCartItemDto: UpdateCartItemDto,
   ) {
-    console.log(updateCartItemDto);
     return await this.cartService.update(updateCartItemDto);
   }
 
