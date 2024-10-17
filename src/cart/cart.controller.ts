@@ -6,9 +6,15 @@ import {
   Query,
   Patch,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto, FindUserCartDto, UpdateCartItemDto } from './dto';
+import {
+  CreateCartDto,
+  DeleteCartItemDto,
+  FindUserCartDto,
+  UpdateCartItemDto,
+} from './dto';
 
 @Controller('cart')
 export class CartController {
@@ -35,5 +41,18 @@ export class CartController {
   @Post()
   async create(@Body() createCartDto: CreateCartDto) {
     return await this.cartService.create(createCartDto);
+  }
+
+  @Delete()
+  async delete(
+    @Body(
+      new ValidationPipe({
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+      }),
+    )
+    deleteCartItemDto: DeleteCartItemDto,
+  ) {
+    return await this.cartService.delete(deleteCartItemDto);
   }
 }

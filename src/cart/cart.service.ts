@@ -5,11 +5,30 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCartDto, FindUserCartDto, UpdateCartItemDto } from './dto';
+import {
+  CreateCartDto,
+  DeleteCartItemDto,
+  FindUserCartDto,
+  UpdateCartItemDto,
+} from './dto';
 
 @Injectable()
 export class CartService {
   constructor(private prismaService: PrismaService) {}
+
+  async delete(deleteCartItemDto: DeleteCartItemDto) {
+    try {
+      await this.prismaService.cart.delete({
+        where: {
+          id: deleteCartItemDto.id,
+        },
+      });
+
+      return { message: 'Deleted a cart item successfully', error: null };
+    } catch (error) {
+      throw new ForbiddenException('Failed to delete a cart item');
+    }
+  }
 
   async update(updateCartItemDto: UpdateCartItemDto) {
     try {
@@ -58,7 +77,6 @@ export class CartService {
         }
       }
     } catch (error) {
-      console.log(error);
       throw new ForbiddenException('Failed to update a cart item');
     }
   }
@@ -117,7 +135,6 @@ export class CartService {
         return { message: 'Cart data already exists', error: null };
       }
     } catch (error) {
-      console.log(error);
       throw new BadRequestException('Failed to create cart');
     }
   }
