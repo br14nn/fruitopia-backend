@@ -16,17 +16,93 @@ import {
 export class CartService {
   constructor(private prismaService: PrismaService) {}
 
-  async delete(deleteCartItemDto: DeleteCartItemDto) {
+  async create(createCartDto: CreateCartDto) {
     try {
-      await this.prismaService.cart.delete({
+      const foundData = await this.prismaService.cart.findFirst({
         where: {
-          id: deleteCartItemDto.id,
+          AND: [
+            { userID: createCartDto.userID },
+            { productID: createCartDto.productID },
+          ],
         },
       });
 
-      return { message: 'Deleted a cart item successfully', error: null };
+      if (!foundData) {
+        await this.prismaService.cart.create({
+          data: {
+            quantity: 1,
+            user: { connect: { id: createCartDto.userID } },
+            product: { connect: { id: createCartDto.productID } },
+          },
+        });
+
+        return { message: 'Created a cart data', error: null };
+      } else {
+        return { message: 'Cart data already exists', error: null };
+      }
     } catch (error) {
-      throw new ForbiddenException('Failed to delete a cart item');
+      throw new BadRequestException('Failed to create cart');
+    }
+  }
+
+  async find(findUserCartDto: FindUserCartDto) {
+    try {
+      if (findUserCartDto.userID) {
+        const userCart = await this.prismaService.cart.findMany({
+          where: {
+            userID: findUserCartDto.userID,
+          },
+          select: {
+            id: true,
+            quantity: true,
+            productID: true,
+            product: true,
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        });
+
+        return { message: userCart, error: null };
+      }
+
+      return { message: [], error: null };
+    } catch (error) {
+      throw new NotFoundException(
+        "Something went wrong retrieving a user's cart list",
+      );
+    }
+  }
+
+  async getTotal(params: { id: string }) {
+    try {
+      const data = await this.prismaService.cart.findMany({
+        where: {
+          userID: params.id,
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+        },
+      });
+
+      let total: number = 0;
+
+      for (let i = 0; i < data.length; i++) {
+        total = total + data[i].product.price * data[i].quantity;
+      }
+
+      return {
+        message: { total: parseFloat(total.toFixed(2)) },
+        error: null,
+      };
+    } catch (error) {
+      throw new ForbiddenException('Failed to get cart total');
     }
   }
 
@@ -81,61 +157,17 @@ export class CartService {
     }
   }
 
-  async find(findUserCartDto: FindUserCartDto) {
+  async delete(deleteCartItemDto: DeleteCartItemDto) {
     try {
-      if (findUserCartDto.userID) {
-        const userCart = await this.prismaService.cart.findMany({
-          where: {
-            userID: findUserCartDto.userID,
-          },
-          select: {
-            id: true,
-            quantity: true,
-            productID: true,
-            product: true,
-          },
-          orderBy: {
-            id: 'asc',
-          },
-        });
-
-        return { message: userCart, error: null };
-      }
-
-      return { message: [], error: null };
-    } catch (error) {
-      throw new NotFoundException(
-        "Something went wrong retrieving a user's cart list",
-      );
-    }
-  }
-
-  async create(createCartDto: CreateCartDto) {
-    try {
-      const foundData = await this.prismaService.cart.findFirst({
+      await this.prismaService.cart.delete({
         where: {
-          AND: [
-            { userID: createCartDto.userID },
-            { productID: createCartDto.productID },
-          ],
+          id: deleteCartItemDto.id,
         },
       });
 
-      if (!foundData) {
-        await this.prismaService.cart.create({
-          data: {
-            quantity: 1,
-            user: { connect: { id: createCartDto.userID } },
-            product: { connect: { id: createCartDto.productID } },
-          },
-        });
-
-        return { message: 'Created a cart data', error: null };
-      } else {
-        return { message: 'Cart data already exists', error: null };
-      }
+      return { message: 'Deleted a cart item successfully', error: null };
     } catch (error) {
-      throw new BadRequestException('Failed to create cart');
+      throw new ForbiddenException('Failed to delete a cart item');
     }
   }
 }

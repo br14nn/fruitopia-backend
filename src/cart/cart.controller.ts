@@ -7,6 +7,7 @@ import {
   Patch,
   ValidationPipe,
   Delete,
+  Param,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import {
@@ -20,6 +21,21 @@ import {
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
+  @Post()
+  async create(@Body() createCartDto: CreateCartDto) {
+    return await this.cartService.create(createCartDto);
+  }
+
+  @Get()
+  async find(@Query() findUserCartDto: FindUserCartDto) {
+    return await this.cartService.find(findUserCartDto);
+  }
+
+  @Get('/total/:id')
+  async getTotal(@Param() params: { id: string }) {
+    return this.cartService.getTotal(params);
+  }
+
   @Patch()
   async update(
     @Body(
@@ -31,16 +47,6 @@ export class CartController {
     updateCartItemDto: UpdateCartItemDto,
   ) {
     return await this.cartService.update(updateCartItemDto);
-  }
-
-  @Get()
-  async find(@Query() findUserCartDto: FindUserCartDto) {
-    return await this.cartService.find(findUserCartDto);
-  }
-
-  @Post()
-  async create(@Body() createCartDto: CreateCartDto) {
-    return await this.cartService.create(createCartDto);
   }
 
   @Delete()
