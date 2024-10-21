@@ -170,4 +170,33 @@ export class CartService {
       throw new ForbiddenException('Failed to delete a cart item');
     }
   }
+
+  async deleteCartCheckout(params: { userID: string }) {
+    try {
+      const foundData = await this.prismaService.cart.findMany({
+        select: {
+          userID: true,
+          productID: true,
+          quantity: true,
+        },
+        where: {
+          userID: params.userID,
+        },
+      });
+
+      await this.prismaService.orderHistory.createMany({
+        data: foundData,
+      });
+
+      const numOfDeleted = await this.prismaService.cart.deleteMany({
+        where: {
+          userID: params.userID,
+        },
+      });
+
+      return { message: numOfDeleted, error: null };
+    } catch (error) {
+      throw new BadRequestException('Failed to checkout cart');
+    }
+  }
 }

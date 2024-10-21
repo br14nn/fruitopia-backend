@@ -61,4 +61,9 @@ export class CartController {
   ) {
     return await this.cartService.delete(deleteCartItemDto);
   }
+
+  @Delete('/checkout/:userID')
+  async deleteCartCheckout(@Param() params: { userID: string }) {
+    return await this.cartService.deleteCartCheckout(params);
+  }
 }
