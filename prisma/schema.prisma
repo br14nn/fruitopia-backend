@@ -13,22 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Category {
+  SPRING
+  SUMMER
+  FALL
+  WINTER
+}
+
 model Product {
-  id          Int       @id @default(autoincrement())
-  name        String
-  image       String?
-  description String?
-  price       Float
-  category    Category?
-  Cart        Cart[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  image        String?
+  description  String?
+  price        Float
+  category     Category?
+  Cart         Cart[]
+  OrderHistory OrderHistory[]
 }
 
 model User {
-  id      String @id
-  email   String @unique
-  name    String
-  picture String
-  Cart    Cart[]
+  id           String         @id
+  email        String         @unique
+  name         String
+  picture      String
+  Cart         Cart[]
+  OrderHistory OrderHistory[]
 }
 
 model Cart {
@@ -40,9 +49,12 @@ model Cart {
   quantity  Int
 }
 
-enum Category {
-  SPRING
-  SUMMER
-  FALL
-  WINTER
+model OrderHistory {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userID], references: [id])
+  userID       String
+  product      Product  @relation(fields: [productID], references: [id])
+  productID    Int
+  quantity     Int
+  checkoutDate DateTime @default(now())
 }
